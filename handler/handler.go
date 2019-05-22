@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"SuperReady/meta"
@@ -69,6 +70,20 @@ func GetFileMetaHandler(w http.ResponseWriter, r *http.Request) {
 	filehash := r.Form["filehash"][0]
 	fMeta := meta.GetFileMeta(filehash)
 	data, err := json.Marshal(fMeta)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Write(data)
+}
+
+// FileQueryHandler : Query file meta-data as batching
+func FileQueryHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	limitCnt, _ := strconv.Atoi(r.Form.Get("limit"))
+	fileMetas := meta.GetLastFileMetas(limitCnt)
+	data, err := json.Marshal(fileMetas)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
